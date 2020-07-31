@@ -20,14 +20,12 @@ logging.basicConfig(format='%(asctime)s - %(message)s',
 #### /print debug information to stdout
 
 # Read the dataset
-model_name = 'bert-base-uncased'
+model_name = 'bert-large-uncased'
 batch_size = 16
 nli_reader = NLIDataReader('../datasets/AllNLI')
 sts_reader = STSBenchmarkDataReader('../datasets/stsbenchmark')
 train_num_labels = nli_reader.get_num_labels()
-model_save_path = 'output/training_multi-task_'+model_name+'-'+datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-
-
+model_save_path = 'output/training_multi-task_' + model_name + '-' + datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 # Use BERT for mapping tokens to embeddings
 word_embedding_model = models.Transformer(model_name)
@@ -40,18 +38,17 @@ pooling_model = models.Pooling(word_embedding_model.get_word_embedding_dimension
 
 model = SentenceTransformer(modules=[word_embedding_model, pooling_model])
 
-
 # Convert the dataset to a DataLoader ready for training
 logging.info("Read AllNLI train dataset")
 train_data_nli = SentencesDataset(nli_reader.get_examples('train.gz'), model=model)
 train_dataloader_nli = DataLoader(train_data_nli, shuffle=True, batch_size=batch_size)
-train_loss_nli = losses.SoftmaxLoss(model=model, sentence_embedding_dimension=model.get_sentence_embedding_dimension(), num_labels=train_num_labels)
+train_loss_nli = losses.SoftmaxLoss(model=model, sentence_embedding_dimension=model.get_sentence_embedding_dimension(),
+                                    num_labels=train_num_labels)
 
 logging.info("Read STSbenchmark train dataset")
 train_data_sts = SentencesDataset(sts_reader.get_examples('sts-train.csv'), model=model)
 train_dataloader_sts = DataLoader(train_data_sts, shuffle=True, batch_size=batch_size)
 train_loss_sts = losses.CosineSimilarityLoss(model=model)
-
 
 logging.info("Read STSbenchmark dev dataset")
 dev_data = SentencesDataset(examples=sts_reader.get_examples('sts-dev.csv'), model=model)
@@ -61,9 +58,8 @@ evaluator = EmbeddingSimilarityEvaluator(dev_dataloader)
 # Configure the training
 num_epochs = 4
 
-warmup_steps = math.ceil(len(train_data_sts) * num_epochs / batch_size * 0.1) #10% of train data for warm-up
+warmup_steps = math.ceil(len(train_data_sts) * num_epochs / batch_size * 0.1)  # 10% of train data for warm-up
 logging.info("Warmup-steps: {}".format(warmup_steps))
-
 
 # Here we define the two train objectives: train_dataloader_nli with train_loss_nli (i.e., SoftmaxLoss for NLI data)
 # and train_dataloader_sts with train_loss_sts (i.e., CosineSimilarityLoss for STSbenchmark data)
@@ -78,8 +74,6 @@ model.fit(train_objectives=train_objectives,
           warmup_steps=warmup_steps,
           output_path=model_save_path
           )
-
-
 
 ##############################################################################
 #
