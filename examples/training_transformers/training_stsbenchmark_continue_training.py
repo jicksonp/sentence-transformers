@@ -47,21 +47,24 @@ warmup_steps = math.ceil(len(train_dataset) * num_epochs / train_batch_size * 0.
 logging.info("Warmup-steps: {}".format(warmup_steps))
 
 # Train the model
+print('Fine tuning started')
 model.fit(train_objectives=[(train_dataloader, train_loss)],
           evaluator=evaluator,
           epochs=num_epochs,
           evaluation_steps=1000,
           warmup_steps=warmup_steps,
           output_path=model_save_path)
+print('Fine tuning completed')
 
 ##############################################################################
 #
 # Load the stored model and evaluate its performance on STS benchmark dataset
 #
 ##############################################################################
-
+print('Evaluate the model started')
 model = SentenceTransformer(model_save_path)
 test_data = SentencesDataset(examples=sts_reader.get_examples("sts-test.csv"), model=model)
 test_dataloader = DataLoader(test_data, shuffle=False, batch_size=train_batch_size)
 evaluator = EmbeddingSimilarityEvaluator(test_dataloader)
 model.evaluate(evaluator)
+print('Evaluate the model completed')
