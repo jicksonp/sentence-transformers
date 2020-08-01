@@ -24,7 +24,8 @@ class BERT(nn.Module):
         if self.do_lower_case is not None:
             tokenizer_args['do_lower_case'] = do_lower_case
 
-        self.bert = BertModel.from_pretrained(model_name_or_path, **model_args)
+        bert = BertModel.from_pretrained(model_name_or_path, **model_args)
+        self.bert = nn.DataParallel(bert)
         self.tokenizer = BertTokenizer.from_pretrained(model_name_or_path, **tokenizer_args)
 
 
