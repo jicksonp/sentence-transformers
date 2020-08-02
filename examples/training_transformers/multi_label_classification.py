@@ -172,7 +172,7 @@ Dataset and Dataloader are constructs of the PyTorch library for defining and co
 MAX_LEN = 200
 TRAIN_BATCH_SIZE = 8
 VALID_BATCH_SIZE = 4
-EPOCHS = 1
+EPOCHS = 4
 LEARNING_RATE = 1e-05
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
