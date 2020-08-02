@@ -138,7 +138,7 @@ We will be working with the data and preparing for fine tuning purposes.
 df = pd.read_csv("./data/train.csv")
 df['list'] = df[df.columns[2:]].values.tolist()
 new_df = df[['comment_text', 'list']].copy()
-new_df.head()
+print(new_df.head())
 
 """<a id='section03'></a>
 ### Preparing the Dataset and Dataloader
@@ -275,7 +275,8 @@ class BERTClass(torch.nn.Module):
         super(BERTClass, self).__init__()
         self.l1 = transformers.BertModel.from_pretrained('bert-base-uncased')
         self.l2 = torch.nn.Dropout(0.3)
-        self.l3 = torch.nn.Linear(768, 6)
+        # 4, should be label size.
+        self.l3 = torch.nn.Linear(768, 4)
 
     def forward(self, ids, mask, token_type_ids):
         _, output_1 = self.l1(ids, attention_mask=mask, token_type_ids=token_type_ids)
